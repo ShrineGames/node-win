@@ -1,6 +1,6 @@
 {
     "name": "node-win",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Node.js wrappers for Windows utilities",
     "main": "dist/binding.js",
     "types": "dist/binding.d.ts",
