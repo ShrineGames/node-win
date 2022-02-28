@@ -1,0 +1,9 @@
+*.tgz
+.github
+.gitignore
+.idea
+.npmignore
+.travis.yml
+build
+node_modules
+npm-debug.log
