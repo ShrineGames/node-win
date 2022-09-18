@@ -1,6 +1,7 @@
 // clang-format off
 #include <napi.h>
 
+#include "input.h"
 #include "service.h"
 // clang-format on
 

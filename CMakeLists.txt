@@ -7,6 +7,8 @@ project(node_win)
 
 set(SOURCES 
         src/library.cpp 
+        src/input.h
+        src/input.cpp
         src/service.h 
         src/service.cpp)
 
