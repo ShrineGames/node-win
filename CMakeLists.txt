@@ -5,7 +5,10 @@ set(CMAKE_CXX_STANDARD 20)
 add_definitions(-DNAPI_VERSION=3)
 project(node_win)
 
-set(SOURCES src/library.cpp src/Service.h src/Service.cpp)
+set(SOURCES 
+        src/library.cpp 
+        src/service.h 
+        src/service.cpp)
 
 add_library(node_win SHARED ${SOURCES} ${CMAKE_JS_SRC})
 

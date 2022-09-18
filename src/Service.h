@@ -1,8 +1,17 @@
 #pragma once
 
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
 #include <string>
+
+class Input
+{
+public:
+  // Returns the number of milliseconds since the last user input, or -1 on
+  // failure.
+  static int GetTimeSinceLastInput();
+};
 
 class Service
 {
@@ -12,14 +21,18 @@ public:
    * @param serviceName Service name
    * @param displayName Service display name
    * @param fileName Path to the service executable
-   * @return True if the service was installed and started successfully, false otherwise.
+   * @return True if the service was installed and started successfully, false
+   * otherwise.
    */
-  static bool Install(const std::string& serviceName, const std::string& displayName, const std::string& fileName);
+  static bool Install(const std::string& serviceName,
+                      const std::string& displayName,
+                      const std::string& fileName);
 
   /**
    * Stop and uninstall a Windows service.
    * @param serviceName Service name
-   * @return True if the service was stopped and uninstalled successfully, false otherwise.
+   * @return True if the service was stopped and uninstalled successfully, false
+   * otherwise.
    */
   static bool Uninstall(const std::string& serviceName);
 
@@ -51,7 +64,9 @@ private:
 
   static DWORD GetStatus(SC_HANDLE service);
 
-  static bool WaitForStatus(SC_HANDLE service, DWORD waitStatus, DWORD desiredStatus);
+  static bool WaitForStatus(SC_HANDLE service,
+                            DWORD waitStatus,
+                            DWORD desiredStatus);
 
   static SC_HANDLE OpenManager(DWORD rights);
 };

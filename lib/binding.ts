@@ -1,6 +1,12 @@
 const addon = require('bindings')('node_win');
 
 namespace Windows {
+    export class Input {
+        public getTimeSinceLastInput() {
+            return addon.GetTimeSinceLastInput();
+        }
+    }
+
     export class ServiceManager {
         public install(serviceName: string, displayName: string, fileName: string): boolean {
             return addon.Service_Install(serviceName, displayName, fileName);

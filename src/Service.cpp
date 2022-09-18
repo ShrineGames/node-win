@@ -1,6 +1,24 @@
-#include "Service.h"
+#include "service.h"
 
-bool Service::Install(const std::string& serviceName, const std::string& displayName, const std::string& fileName)
+int Input::GetTimeSinceLastInput()
+{
+  LASTINPUTINFO last_input_info {};
+  last_input_info.cbSize = sizeof(LASTINPUTINFO);
+  last_input_info.dwTime = 0;
+
+  if (!GetLastInputInfo(&last_input_info)) {
+    return -1;
+  }
+
+  int ticks = GetTickCount();
+  int idle_ms = ticks - last_input_info.dwTime;
+
+  return idle_ms;
+}
+
+bool Service::Install(const std::string& serviceName,
+                      const std::string& displayName,
+                      const std::string& fileName)
 {
   auto manager = OpenManager(SC_MANAGER_CONNECT | SC_MANAGER_CREATE_SERVICE);
   if (manager == nullptr) {
@@ -8,24 +26,21 @@ bool Service::Install(const std::string& serviceName, const std::string& display
   }
 
   auto service = OpenService(
-      manager,
-      serviceName.c_str(),
-      SERVICE_QUERY_STATUS | SERVICE_START);
+      manager, serviceName.c_str(), SERVICE_QUERY_STATUS | SERVICE_START);
   if (service == nullptr) {
-    service = CreateService(
-        manager,
-        serviceName.c_str(),
-        displayName.c_str(),
-        SERVICE_QUERY_STATUS | SERVICE_START,
-        SERVICE_WIN32_OWN_PROCESS,
-        SERVICE_AUTO_START,
-        SERVICE_ERROR_NORMAL,
-        fileName.c_str(),
-        nullptr,
-        nullptr,
-        nullptr,
-        nullptr,
-        nullptr);
+    service = CreateService(manager,
+                            serviceName.c_str(),
+                            displayName.c_str(),
+                            SERVICE_QUERY_STATUS | SERVICE_START,
+                            SERVICE_WIN32_OWN_PROCESS,
+                            SERVICE_AUTO_START,
+                            SERVICE_ERROR_NORMAL,
+                            fileName.c_str(),
+                            nullptr,
+                            nullptr,
+                            nullptr,
+                            nullptr,
+                            nullptr);
   }
 
   if (service == nullptr) {
@@ -49,11 +64,10 @@ bool Service::Uninstall(const std::string& serviceName)
     return false;
   }
 
-  auto service = OpenService(
-      manager,
-      serviceName.c_str(),
-      STANDARD_RIGHTS_REQUIRED | SERVICE_STOP | SERVICE_QUERY_STATUS
-      );
+  auto service = OpenService(manager,
+                             serviceName.c_str(),
+                             STANDARD_RIGHTS_REQUIRED | SERVICE_STOP |
+                                 SERVICE_QUERY_STATUS);
   if (service == nullptr) {
     printf("OpenService failed (%lu)\n", GetLastError());
     CloseServiceHandle(manager);
@@ -83,10 +97,8 @@ bool Service::IsInstalled(const std::string& serviceName)
     return false;
   }
 
-  auto service = OpenService(
-      manager,
-      serviceName.c_str(),
-      SERVICE_QUERY_STATUS);
+  auto service =
+      OpenService(manager, serviceName.c_str(), SERVICE_QUERY_STATUS);
   if (service == nullptr) {
     CloseServiceHandle(manager);
     return false;
@@ -105,9 +117,7 @@ bool Service::Start(const std::string& serviceName)
   }
 
   auto service = OpenService(
-      manager,
-      serviceName.c_str(),
-      SERVICE_QUERY_STATUS | SERVICE_START);
+      manager, serviceName.c_str(), SERVICE_QUERY_STATUS | SERVICE_START);
   if (service == nullptr) {
     printf("OpenService failed (%lu)\n", GetLastError());
     CloseServiceHandle(manager);
@@ -130,9 +140,7 @@ bool Service::Stop(const std::string& serviceName)
   }
 
   auto service = OpenService(
-      manager,
-      serviceName.c_str(),
-      SERVICE_QUERY_STATUS | SERVICE_STOP);
+      manager, serviceName.c_str(), SERVICE_QUERY_STATUS | SERVICE_STOP);
   if (service == nullptr) {
     printf("OpenServiceA failed (%lu)\n", GetLastError());
     CloseServiceHandle(manager);
@@ -170,7 +178,9 @@ DWORD Service::GetStatus(SC_HANDLE service)
   return status.dwCurrentState;
 }
 
-bool Service::WaitForStatus(SC_HANDLE service, DWORD waitStatus, DWORD desiredStatus)
+bool Service::WaitForStatus(SC_HANDLE service,
+                            DWORD waitStatus,
+                            DWORD desiredStatus)
 {
   SERVICE_STATUS_PROCESS status;
   DWORD startTime = GetTickCount();
@@ -179,12 +189,11 @@ bool Service::WaitForStatus(SC_HANDLE service, DWORD waitStatus, DWORD desiredSt
   DWORD bytesNeeded;
 
   // Check if the service is already in the desired status.
-  if (!QueryServiceStatusEx(
-          service,
-          SC_STATUS_PROCESS_INFO,
-          (LPBYTE)&status,
-          sizeof(SERVICE_STATUS_PROCESS),
-          &bytesNeeded)) {
+  if (!QueryServiceStatusEx(service,
+                            SC_STATUS_PROCESS_INFO,
+                            (LPBYTE)&status,
+                            sizeof(SERVICE_STATUS_PROCESS),
+                            &bytesNeeded)) {
     printf("QueryServiceStatusEx failed (%lu)\n", GetLastError());
     return false;
   }
@@ -208,13 +217,11 @@ bool Service::WaitForStatus(SC_HANDLE service, DWORD waitStatus, DWORD desiredSt
 
     // Check if the service reached the desired status. If it did, return true
     // immediately. Otherwise, continue waiting until the timeout.
-    if (!QueryServiceStatusEx(
-            service,
-            SC_STATUS_PROCESS_INFO,
-            (LPBYTE)&status,
-            sizeof(SERVICE_STATUS_PROCESS),
-            &bytesNeeded
-            )) {
+    if (!QueryServiceStatusEx(service,
+                              SC_STATUS_PROCESS_INFO,
+                              (LPBYTE)&status,
+                              sizeof(SERVICE_STATUS_PROCESS),
+                              &bytesNeeded)) {
       printf("QueryServiceStatusEx failed (%lu)\n", GetLastError());
       return false;
     }

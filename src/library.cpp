@@ -1,6 +1,16 @@
+// clang-format off
 #include <napi.h>
 
-#include "Service.h"
+#include "service.h"
+// clang-format on
+
+Napi::Number GetTimeSinceLastInput(const Napi::CallbackInfo& info)
+{
+  Napi::Env env = info.Env();
+
+  int idle_ms = Input::GetTimeSinceLastInput();
+  return Napi::Number::New(env, idle_ms);
+}
 
 Napi::Boolean Service_Install(const Napi::CallbackInfo& info)
 {
@@ -56,11 +66,18 @@ Napi::Boolean Service_Stop(const Napi::CallbackInfo& info)
 
 Napi::Object Init(Napi::Env env, Napi::Object exports)
 {
-  exports.Set(Napi::String::New(env, "Service_Install"), Napi::Function::New(env, Service_Install));
-  exports.Set(Napi::String::New(env, "Service_Uninstall"), Napi::Function::New(env, Service_Uninstall));
-  exports.Set(Napi::String::New(env, "Service_IsInstalled"), Napi::Function::New(env, Service_IsInstalled));
-  exports.Set(Napi::String::New(env, "Service_Start"), Napi::Function::New(env, Service_Start));
-  exports.Set(Napi::String::New(env, "Service_Stop"), Napi::Function::New(env, Service_Stop));
+  exports.Set(Napi::String::New(env, "GetTimeSinceLastInput"),
+              Napi::Function::New(env, GetTimeSinceLastInput));
+  exports.Set(Napi::String::New(env, "Service_Install"),
+              Napi::Function::New(env, Service_Install));
+  exports.Set(Napi::String::New(env, "Service_Uninstall"),
+              Napi::Function::New(env, Service_Uninstall));
+  exports.Set(Napi::String::New(env, "Service_IsInstalled"),
+              Napi::Function::New(env, Service_IsInstalled));
+  exports.Set(Napi::String::New(env, "Service_Start"),
+              Napi::Function::New(env, Service_Start));
+  exports.Set(Napi::String::New(env, "Service_Stop"),
+              Napi::Function::New(env, Service_Stop));
 
   return exports;
 }
